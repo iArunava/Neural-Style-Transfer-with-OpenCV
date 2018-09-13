@@ -1,11 +1,36 @@
 import argparse
 import time
 import os
+import subprocess
 import cv2 as cv
 
 FLAGS = None
 VID = 'video'
 IMG = 'image'
+
+def predict(img, h, w):
+    blob = cv.dnn.blobFromImage(img, 1.0, (w, h),
+        (103.939, 116.779, 123.680), swapRB=False, crop=False)
+
+    print ('[INFO] Setting the input to the model')
+    net.setInput(blob)
+
+    print ('[INFO] Starting Inference!')
+    start = time.time()
+    out = net.forward()
+    end = time.time()
+    print ('[INFO] Inference Completed successfully!')
+
+    # Reshape the output tensor and add back in the mean subtraction, and
+    # then swap the channel ordering
+    out = out.reshape((3, out.shape[2], out.shape[3]))
+    out[0] += 103.939
+    out[1] += 116.779
+    out[2] += 123.680
+    out /= 255.0
+    out = out.transpose(1, 2, 0)
+
+    return out
 
 # Source for this function:
 # https://github.com/jrosebr1/imutils/blob/4635e73e75965c6fef09347bead510f81142cf2e/imutils/convenience.py#L65
@@ -53,10 +78,20 @@ if __name__ == '__main__':
                 help='The path to save the generated stylized image \
                        only when in image mode.')
 
+    parser.add_argument('--download-models',
+                type=bool,
+                default=False,
+                help='If set to true all the pretrained models are downloaded, \
+                    using the script in the downloads directory.')
+
     FLAGS, unparsed = parser.parse_known_args()
 
+    # download models if needed
+    if FLAGS.download_models:
+        subprocess.call(['./models/download.sh'])
+
     # Set the mode image/video based on the argparse
-    if FLAGS.image == '':
+    if FLAGS.image is None:
         mode =  VID
     else:
         mode = IMG
@@ -75,10 +110,14 @@ if __name__ == '__main__':
     print (path + models[0])
     print ('[INFO] Loading the model...')
 
+    model_loaded_i = -1
+    total_models = len(os.listdir(FLAGS.model_path))
+
     if FLAGS.model is not None:
         model_to_load = FLAGS.model
     else:
-        model_to_load = path + models[0]
+        model_loaded_i = 0
+        model_to_load = path + models[model_loaded_i]
     net = cv.dnn.readNetFromTorch(model_to_load)
 
     print ('[INFO] Model Loaded successfully!')
@@ -86,6 +125,29 @@ if __name__ == '__main__':
     # Loading the image depending on the type
     if mode == VID:
         pass
+        vid = cv.VideoCapture(0)
+        while True:
+            _, frame = vid.read()
+            img = resize_img(frame, width=600)
+            h, w  = img.shape[:2]
+            out = predict(img, h, w)
+
+            cv.imshow('Stylizing Real-time Video', out)
+
+            key = cv.waitKey(1) & 0xFF
+            if key == ord('q'):
+                break
+            elif key == ord('n') and FLAGS.model is None:
+                model_loaded_i = (model_loaded_i + 1) % total_models
+                model_to_load = path + models[model_loaded_i]
+                net = cv.dnn.readNetFromTorch(model_to_load)
+            elif key == ord('p') and FLAGS.model is None:
+                model_loaded_i = (model_loaded_i - 1) % total_models
+                model_to_load = path + models[model_loaded_i]
+                net = cv.dnn.readNetFromTorch(model_to_load)
+
+        vid.release()
+        cv.destroyAllWindows()
     elif mode == IMG:
         print ('[INFO] Reading the image')
         img = cv.imread(FLAGS.image)
@@ -93,26 +155,10 @@ if __name__ == '__main__':
 
         img = resize_img(img, width=600)
         h, w  = img.shape[:2]
-        blob = cv.dnn.blobFromImage(img, 1.0, (w, h),
-            (103.939, 116.779, 123.680), swapRB=False, crop=False)
 
-        print ('[INFO] Setting the input to the model')
-        net.setInput(blob)
+        # Get the output from the pretrained model
+        out = predict(img, h, w)
 
-        print ('[INFO] Starting Inference!')
-        start = time.time()
-        out = net.forward()
-        end = time.time()
-        print ('[INFO] Inference Completed successfully!')
-
-        # Reshape the output tensor and add back in the mean subtraction, and
-        # then swap the channel ordering
-        out = out.reshape((3, out.shape[2], out.shape[3]))
-        out[0] += 103.939
-        out[1] += 116.779
-        out[2] += 123.680
-        out /= 255.0
-        out = out.transpose(1, 2, 0)
 
         # Printing the inference time
         print ('[INFO] The model ran in {:.4f} seconds'.format(end-start))
