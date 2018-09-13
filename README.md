@@ -25,7 +25,7 @@ For the video mode
 python3 init.py
 ```
 
-3) Use the help to get some involved usage
+3) Use the help to get some involved usage arguments
 ```
 python3 init.py --help
 ```
