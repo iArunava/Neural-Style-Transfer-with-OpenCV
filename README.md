@@ -25,7 +25,12 @@ For the video mode
 python3 init.py
 ```
 
-3) Enjoy!
+3) Use the help to get some involved usage
+```
+python3 init.py --help
+```
+
+4) **Enjoy!**
 
 # Results
 
