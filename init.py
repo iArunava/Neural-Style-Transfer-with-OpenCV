@@ -36,6 +36,23 @@ if __name__ == '__main__':
                 type=str,
                 help='Path to the image.')
 
+    parser.add_argument('-md', '--model',
+                type=str,
+                help='The file path to the direct model.\
+                 If this is specified, the model-path argument is \
+                 not considered.')
+
+    parser.add_argument('--show-original-image',
+                type=bool,
+                default=False,
+                help='Whether or not to show the original image')
+
+    parser.add_argument('--save-img-with-name',
+                type=str,
+                default='stylizedimage.png',
+                help='The path to save the generated stylized image \
+                       only when in image mode.')
+
     FLAGS, unparsed = parser.parse_known_args()
 
     # Set the mode image/video based on the argparse
@@ -56,27 +73,37 @@ if __name__ == '__main__':
     # Load the neural style transfer model
     path = FLAGS.model_path + ('' if FLAGS.model_path.endswith('/') else '/')
     print (path + models[0])
-    print ('Loading the model...')
-    net = cv.dnn.readNetFromTorch(path + models[0])
+    print ('[INFO] Loading the model...')
+
+    if FLAGS.model is not None:
+        model_to_load = FLAGS.model
+    else:
+        model_to_load = path + models[0]
+    net = cv.dnn.readNetFromTorch(model_to_load)
+
+    print ('[INFO] Model Loaded successfully!')
 
     # Loading the image depending on the type
     if mode == VID:
         pass
     elif mode == IMG:
+        print ('[INFO] Reading the image')
         img = cv.imread(FLAGS.image)
-        img = resize_img(img)
+        print ('[INFO] Image Loaded successfully!')
+
+        img = resize_img(img, width=600)
         h, w  = img.shape[:2]
         blob = cv.dnn.blobFromImage(img, 1.0, (w, h),
             (103.939, 116.779, 123.680), swapRB=False, crop=False)
 
+        print ('[INFO] Setting the input to the model')
         net.setInput(blob)
 
-        input('Shall I?')
+        print ('[INFO] Starting Inference!')
         start = time.time()
         out = net.forward()
         end = time.time()
-        print ('dfd')
-
+        print ('[INFO] Inference Completed successfully!')
 
         # Reshape the output tensor and add back in the mean subtraction, and
         # then swap the channel ordering
@@ -88,9 +115,14 @@ if __name__ == '__main__':
         out = out.transpose(1, 2, 0)
 
         # Printing the inference time
-        print ('The model ran in {:.4f} seconds'.format(end-start))
+        print ('[INFO] The model ran in {:.4f} seconds'.format(end-start))
 
         # show the image
-        cv.imshow('Input Image', img)
+        if FLAGS.show_original_image:
+            cv.imshow('Input Image', img)
         cv.imshow('Stylized image', out)
+        print ('[INFO] Hit Esc to close!')
         cv.waitKey(0)
+
+        if FLAGS.save_image_with_name is not None:
+            cv.imwrite(out, FLAGS.save_image_with_name)
