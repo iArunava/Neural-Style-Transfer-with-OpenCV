@@ -30,6 +30,10 @@ def predict(img, h, w):
     out /= 255.0
     out = out.transpose(1, 2, 0)
 
+    # Printing the inference time
+    if FLAGS.print_inference_time:
+        print ('[INFO] The model ran in {:.4f} seconds'.format(end-start))
+
     return out
 
 # Source for this function:
@@ -72,7 +76,7 @@ if __name__ == '__main__':
                 default=False,
                 help='Whether or not to show the original image')
 
-    parser.add_argument('--save-img-with-name',
+    parser.add_argument('--save-image-with-name',
                 type=str,
                 default='stylizedimage.png',
                 help='The path to save the generated stylized image \
@@ -83,6 +87,12 @@ if __name__ == '__main__':
                 default=False,
                 help='If set to true all the pretrained models are downloaded, \
                     using the script in the downloads directory.')
+
+    parser.add_argument('--print-inference-time',
+                type=bool,
+                default=False,
+                help='If set to True, then the time taken for the model is output \
+                    to the console.')
 
     FLAGS, unparsed = parser.parse_known_args()
 
@@ -159,10 +169,6 @@ if __name__ == '__main__':
         # Get the output from the pretrained model
         out = predict(img, h, w)
 
-
-        # Printing the inference time
-        print ('[INFO] The model ran in {:.4f} seconds'.format(end-start))
-
         # show the image
         if FLAGS.show_original_image:
             cv.imshow('Input Image', img)
@@ -171,4 +177,4 @@ if __name__ == '__main__':
         cv.waitKey(0)
 
         if FLAGS.save_image_with_name is not None:
-            cv.imwrite(out, FLAGS.save_image_with_name)
+            cv.imwrite(FLAGS.save_image_with_name, out)
