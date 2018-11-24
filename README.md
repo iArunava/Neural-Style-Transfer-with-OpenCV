@@ -25,6 +25,9 @@ For the video mode
 python3 init.py
 ```
 
+Press `n` to move to the next style
+Press `p` to move to the previous style
+
 3) Use the help to get some involved usage arguments
 ```
 python3 init.py --help
