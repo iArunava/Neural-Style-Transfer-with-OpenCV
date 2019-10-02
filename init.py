@@ -177,4 +177,7 @@ if __name__ == '__main__':
         cv.waitKey(0)
 
         if FLAGS.save_image_with_name is not None:
+            out = cv.normalize(out, None, alpha=0, beta=1, norm_type=cv.NORM_MINMAX, dtype=cv.CV_32F)
+            out *= 255
+            out = out.astype("uint8")
             cv.imwrite(FLAGS.save_image_with_name, out)
