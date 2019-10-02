@@ -4,14 +4,23 @@ This repo shows how to perform Neural Style Transfer using OpenCV. <br/>
 This project uses the pretrained models by [Justin Johnson](https://github.com/jcjohnson/fast-neural-style)<br/>
 The code closely follows the pyimagesearch blog by Adrian Rosebrock that you can find here: https://www.pyimagesearch.com/2018/08/27/neural-style-transfer-with-opencv/
 
+# Requirements
+python3
+wget
+opencv-python
 
 # How to use?
-1) Clone the repository
+1) Clone or download the repository
 ```
 git clone https://github.com/iArunava/Neural-Style-Transfer-with-OpenCV
 ```
 
-2) There are two modes to the project
+2) in Master directory execute download script for download models.
+```
+sh models/download.sh
+```
+
+3) There are two modes to the project
 - Image
 - Video
 
@@ -28,12 +37,12 @@ python3 init.py
 - Press `n` to move to the next style
 - Press `p` to move to the previous style
 
-3) Use the help to get some involved usage arguments
+4) Use the help to get some involved usage arguments
 ```
 python3 init.py --help
 ```
 
-4) **Enjoy!**
+5) **Enjoy!**
 
 # Results
 
