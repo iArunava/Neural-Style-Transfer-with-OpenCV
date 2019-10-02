@@ -5,9 +5,9 @@ This project uses the pretrained models by [Justin Johnson](https://github.com/j
 The code closely follows the pyimagesearch blog by Adrian Rosebrock that you can find here: https://www.pyimagesearch.com/2018/08/27/neural-style-transfer-with-opencv/
 
 # Requirements
-python3
-wget
-opencv-python
+- python3
+- wget
+- opencv-python
 
 # How to use?
 1) Clone or download the repository
