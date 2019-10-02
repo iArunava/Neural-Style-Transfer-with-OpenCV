@@ -15,10 +15,11 @@ The code closely follows the pyimagesearch blog by Adrian Rosebrock that you can
 git clone https://github.com/iArunava/Neural-Style-Transfer-with-OpenCV
 ```
 
-2) in Master directory execute download script for download models.
+2) Firstly download models. in master directory execute download script for download models, or use `--download-models` argument of init.py
 ```
 sh models/download.sh
 ```
+
 
 3) There are two modes to the project
 - Image
